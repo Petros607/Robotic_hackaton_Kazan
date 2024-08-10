@@ -1,3 +1,5 @@
+import enum
+
 from sqlalchemy import (
     Column,
     ForeignKey,
@@ -8,9 +10,11 @@ from sqlalchemy import (
     Boolean,
     Float,
     DateTime,
+    Enum,
 )
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.declarative import declarative_base
+
 
 Base = declarative_base()
 
@@ -37,6 +41,19 @@ class User(Base):
     marriage_status = Column("_marriage_status", Boolean, nullable=True)
 
 
+class ObjectTypeEnum(enum.Enum):
+    INITIATIVE = "Инициатива"
+    CLAIM = "Жалоба"
+    PROJECT = "Проект"
+
+
+class ObjectStatusEnum(enum.Enum):
+    pass
+
+
+# TODO: дописать  типы статусов
+
+
 class AbstractObject(Base):
     __tablename__ = "abstract_object"
     id = Column(
@@ -48,14 +65,14 @@ class AbstractObject(Base):
         primary_key=True,
     )
     object_type = Column(
-        "_type", Integer, unique=False, autoincrement=False, nullable=False
+        "_type", Enum(ObjectTypeEnum), unique=False, autoincrement=False, nullable=False
     )
     title = Column("_title", String(100), unique=False, nullable=False)
     text = Column("_text", Text, nullable=False)
-    status = Column("_status", String(50), nullable=True)
+    status = Column("_status", Enum(ObjectStatusEnum), nullable=True)
     images = Column("_images", ARRAY(String(128)), nullable=True)
     docs = Column("_docs", ARRAY[String(128)], nullable=True)
-    decision = Column("_decision", Integer, ForeignKey("decision._id"))
+    decision = Column("_decision", Integer, ForeignKey("decision._id"), nullable=True)
     utility_rating = Column("_utility_rating", Integer, default=0)
     relevance_rating = Column("_relevance_rating", Float, default=0)
     relevance_rating_day = Column("_relevance_rating_day", Float, default=0)
@@ -64,6 +81,61 @@ class AbstractObject(Base):
     datetime_edit = Column("_datetime_edit", DateTime, nullable=True)
 
 
+class DecisionConclusionEnum(enum.Enum):
+    APPROVED = "Одобрено"
+    REJECTED = "Отклонено"
+    FROZEN = "Заморожено"
+
+
 class Decision(Base):
     __tablename__ = "decision"
-    id = Column(Integer, unique=True, primary_key=True, autoincrement=True)
+    id = Column("_id", Integer, unique=True, primary_key=True, autoincrement=True)
+    text = Column("_text", Text, nullable=False)
+    conclusion = Column("_conclusion", Enum(DecisionConclusionEnum), nullable=False)
+    object_id = Column(
+        "_object_id", Integer, ForeignKey("abstract_object._id"), nullable=False
+    )
+    datetime_creation = Column("_datetime_creation", DateTime, nullable=False)
+
+
+class Comment(Base):
+    __tablename__ = "comment"
+    id = Column("_id", Integer, unique=True, primary_key=True, autoincrement=True)
+    user_id = Column("_user_id", Integer, ForeignKey("user._id"), nullable=False)
+    object_id = Column(
+        "_object_id", Integer, ForeignKey("abstract_object._id"), nullable=False
+    )
+    text = Column("_text", Text, nullable=False)
+    rating = Column("_rating", Integer)
+
+
+class EstimateEnum(enum.Enum):
+    LIKE = 1
+    DISLIKE = -1
+
+
+class CommentEstimate(Base):
+    __tablename__ = "comment_estimate"
+    id = Column("_id", Integer, unique=True, primary_key=True, autoincrement=True)
+    estimation = Column("_estimation", Enum(EstimateEnum), nullable=False)
+    user_id = Column("_user_id", Integer, ForeignKey("user._id"), nullable=False)
+    comment_id = Column("_comment_id", Integer, ForeignKey("comment._id"), nullable=False)
+    
+class Subscribe(Base):
+    __tablename__ = 'subscribe'
+    id = Column("_id", Integer, unique=True, primary_key=True, autoincrement=True)
+    user_id = Column("_user_id", Integer, ForeignKey("user._id"), nullable=False)
+    object_id = Column(
+        "_object_id", Integer, ForeignKey("abstract_object._id"), nullable=False
+    )
+    
+
+class ObjectEstimate(Base):
+    __tablename__ = "object_estimate"
+    id = Column("_id", Integer, unique=True, primary_key=True, autoincrement=True)
+    user_id = Column("_user_id", Integer, ForeignKey("user._id"), nullable=False)
+    object_id = Column(
+        "_object_id", Integer, ForeignKey("abstract_object._id"), nullable=False
+    )
+    datetime = Column("_datetime", DateTime, nullable=False)
+    rating = Column("_rating", Enum(EstimateEnum), nullable=False)
