@@ -11,6 +11,7 @@ from sqlalchemy import (
     Float,
     DateTime,
     Enum,
+    SmallInteger 
 )
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.declarative import declarative_base
@@ -24,7 +25,7 @@ class User(Base):
 
     id = Column(
         "_id",
-        String(64),
+        Integer,
         nullable=False,
         unique=True,
         primary_key=True,
@@ -33,7 +34,7 @@ class User(Base):
     username = Column("_username", String(128), nullable=False)
     email = Column("_email", String(100), nullable=True)
     sex = Column("_sex", Boolean, nullable=False)
-    age = Column("_age", Integer, unsigned=True, nullable=False)
+    age = Column("_age", SmallInteger, nullable=False)
     habitation = Column("_habitation", String(20), default="Казань", nullable=True)
     validation = Column("_validation", Boolean, default=False)
     profession = Column("_profession", String(128), nullable=True)
@@ -48,7 +49,9 @@ class ObjectTypeEnum(enum.Enum):
 
 
 class ObjectStatusEnum(enum.Enum):
-    pass
+    CLOSED = "Закрыто"
+    FROZEN = "Заморожено"
+    ACTIVE = "Активно"
 
 
 # TODO: дописать  типы статусов
@@ -65,13 +68,13 @@ class AbstractObject(Base):
         primary_key=True,
     )
     object_type = Column(
-        "_type", Enum(ObjectTypeEnum), unique=False, autoincrement=False, nullable=False
+        "_type", Enum(ObjectTypeEnum, name = "object_type_enum"), unique=False, autoincrement=False, nullable=False
     )
     title = Column("_title", String(100), unique=False, nullable=False)
     text = Column("_text", Text, nullable=False)
-    status = Column("_status", Enum(ObjectStatusEnum), nullable=True)
+    status = Column("_status", Enum(ObjectStatusEnum, name = "status_enum"), nullable=True)
     images = Column("_images", ARRAY(String(128)), nullable=True)
-    docs = Column("_docs", ARRAY[String(128)], nullable=True)
+    docs = Column("_docs", ARRAY(String(128)), nullable=True)
     decision = Column("_decision", Integer, ForeignKey("decision._id"), nullable=True)
     utility_rating = Column("_utility_rating", Integer, default=0)
     relevance_rating = Column("_relevance_rating", Float, default=0)
@@ -91,7 +94,7 @@ class Decision(Base):
     __tablename__ = "decision"
     id = Column("_id", Integer, unique=True, primary_key=True, autoincrement=True)
     text = Column("_text", Text, nullable=False)
-    conclusion = Column("_conclusion", Enum(DecisionConclusionEnum), nullable=False)
+    conclusion = Column("_conclusion", Enum(DecisionConclusionEnum, name = "conclusion_enum"), nullable=False)
     object_id = Column(
         "_object_id", Integer, ForeignKey("abstract_object._id"), nullable=False
     )
@@ -117,7 +120,7 @@ class EstimateEnum(enum.Enum):
 class CommentEstimate(Base):
     __tablename__ = "comment_estimate"
     id = Column("_id", Integer, unique=True, primary_key=True, autoincrement=True)
-    estimation = Column("_estimation", Enum(EstimateEnum), nullable=False)
+    estimation = Column("_estimation", Enum(EstimateEnum, name = "estimate_enum"), nullable=False)
     user_id = Column("_user_id", Integer, ForeignKey("user._id"), nullable=False)
     comment_id = Column("_comment_id", Integer, ForeignKey("comment._id"), nullable=False)
     
@@ -138,4 +141,4 @@ class ObjectEstimate(Base):
         "_object_id", Integer, ForeignKey("abstract_object._id"), nullable=False
     )
     datetime = Column("_datetime", DateTime, nullable=False)
-    rating = Column("_rating", Enum(EstimateEnum), nullable=False)
+    rating = Column("_rating", Enum(EstimateEnum, name = "estimate_enum"), nullable=False)
