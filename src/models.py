@@ -87,7 +87,7 @@ class Decision(Base):
 
 
 class Comment(Base):
-    __tablename__ = "comment"
+    __tablename__ = "comment_estimate"
     metadata = metadata
 
     id = Column("_id", Integer, unique=True, primary_key=True, autoincrement=True)
@@ -104,7 +104,7 @@ class CommentEstimate(Base):
     id = Column("_id", Integer, unique=True, primary_key=True, autoincrement=True)
     estimation = Column("_estimation", Enum(EstimateEnum, name="estimate_enum"), nullable=False)
     user_id = Column("_user_id", Integer, ForeignKey("user._id"), nullable=False)
-    comment_id = Column("_comment_id", Integer, ForeignKey("comment._id"), nullable=False)
+    comment_id = Column("_comment_id", Integer, ForeignKey("comment_estimate._id"), nullable=False)
 
 
 class Subscribe(Base):
