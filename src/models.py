@@ -124,7 +124,7 @@ class Decision(Base):
 
 
 class Comment(Base):
-    __tablename__ = "comment"
+    __tablename__ = "comment_estimate"
     metadata = metadata
 
     id = Column("_id", Integer, unique=True, primary_key=True, autoincrement=True)
