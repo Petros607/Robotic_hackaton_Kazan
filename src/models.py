@@ -9,18 +9,24 @@ from sqlalchemy import (
     Float,
     DateTime,
     Enum,
-    SmallInteger
+    SmallInteger,
 )
 from sqlalchemy import MetaData
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import DeclarativeBase
 
-from src.enums import ObjectTypeEnum, ObjectStatusEnum, EstimateEnum, DecisionConclusionEnum
+from src.enums import (
+    ObjectTypeEnum,
+    ObjectStatusEnum,
+    EstimateEnum,
+    DecisionConclusionEnum,
+)
 
 metadata = MetaData()
 
 
-class Base(DeclarativeBase): pass
+class Base(DeclarativeBase):
+    pass
 
 
 class User(Base):
@@ -35,15 +41,34 @@ class User(Base):
         primary_key=True,
         autoincrement=True,
     )
+    login = Column("_login", String(50), unique=True, nullable=False)
+    password_hash = Column("_password_hash", String(128), nullable=False)
     username = Column("_username", String(128), nullable=False)
     email = Column("_email", String(100), nullable=True)
     sex = Column("_sex", Boolean, nullable=False)
     age = Column("_age", SmallInteger, nullable=False)
     habitation = Column("_habitation", String(20), default="Казань", nullable=True)
-    validation = Column("_validation", Boolean, default=False)
+    validation = Column("_validation", Boolean, default=False, nullable=True)
     profession = Column("_profession", String(128), nullable=True)
-    address = Column("_address", String(255))
+    address = Column("_address", String(255), nullable=True)
     marriage_status = Column("_marriage_status", Boolean, nullable=True)
+
+
+class Token(Base):
+    __tablename__ = "token"
+    metadata = metadata
+    id = Column(
+        "_id",
+        Integer,
+        unique=True,
+        autoincrement=True,
+        primary_key=True,
+        nullable=False,
+    )
+    user_id = Column(
+        "_user_id", Integer, ForeignKey("user._id"), unique=False, nullable=False
+    )
+    referesh_token = Column("_token", Text, unique=True, nullable=False)
 
 
 class AbstractObject(Base):
@@ -59,11 +84,17 @@ class AbstractObject(Base):
         primary_key=True,
     )
     object_type = Column(
-        "_type", Enum(ObjectTypeEnum, name="object_type_enum"), unique=False, autoincrement=False, nullable=False
+        "_type",
+        Enum(ObjectTypeEnum, name="object_type_enum"),
+        unique=False,
+        autoincrement=False,
+        nullable=False,
     )
     title = Column("_title", String(100), unique=False, nullable=False)
     text = Column("_text", Text, nullable=False)
-    status = Column("_status", Enum(ObjectStatusEnum, name="status_enum"), nullable=True)
+    status = Column(
+        "_status", Enum(ObjectStatusEnum, name="status_enum"), nullable=True
+    )
     images = Column("_images", ARRAY(String(128)), nullable=True)
     docs = Column("_docs", ARRAY(String(128)), nullable=True)
     decision = Column("_decision", Integer, ForeignKey("decision._id"), nullable=True)
@@ -81,8 +112,14 @@ class Decision(Base):
 
     id = Column("_id", Integer, unique=True, primary_key=True, autoincrement=True)
     text = Column("_text", Text, nullable=False)
-    conclusion = Column("_conclusion", Enum(DecisionConclusionEnum, name="conclusion_enum"), nullable=False)
-    object_id = Column("_object_id", Integer, ForeignKey("abstract_object._id"), nullable=False)
+    conclusion = Column(
+        "_conclusion",
+        Enum(DecisionConclusionEnum, name="conclusion_enum"),
+        nullable=False,
+    )
+    object_id = Column(
+        "_object_id", Integer, ForeignKey("abstract_object._id"), nullable=False
+    )
     datetime_creation = Column("_datetime_creation", DateTime, nullable=False)
 
 
@@ -92,7 +129,9 @@ class Comment(Base):
 
     id = Column("_id", Integer, unique=True, primary_key=True, autoincrement=True)
     user_id = Column("_user_id", Integer, ForeignKey("user._id"), nullable=False)
-    object_id = Column("_object_id", Integer, ForeignKey("abstract_object._id"), nullable=False)
+    object_id = Column(
+        "_object_id", Integer, ForeignKey("abstract_object._id"), nullable=False
+    )
     text = Column("_text", Text, nullable=False)
     rating = Column("_rating", Integer)
 
@@ -102,18 +141,24 @@ class CommentEstimate(Base):
     metadata = metadata
 
     id = Column("_id", Integer, unique=True, primary_key=True, autoincrement=True)
-    estimation = Column("_estimation", Enum(EstimateEnum, name="estimate_enum"), nullable=False)
+    estimation = Column(
+        "_estimation", Enum(EstimateEnum, name="estimate_enum"), nullable=False
+    )
     user_id = Column("_user_id", Integer, ForeignKey("user._id"), nullable=False)
-    comment_id = Column("_comment_id", Integer, ForeignKey("comment._id"), nullable=False)
+    comment_id = Column(
+        "_comment_id", Integer, ForeignKey("comment._id"), nullable=False
+    )
 
 
 class Subscribe(Base):
-    __tablename__ = 'subscribe'
+    __tablename__ = "subscribe"
     metadata = metadata
 
     id = Column("_id", Integer, unique=True, primary_key=True, autoincrement=True)
     user_id = Column("_user_id", Integer, ForeignKey("user._id"), nullable=False)
-    object_id = Column("_object_id", Integer, ForeignKey("abstract_object._id"), nullable=False)
+    object_id = Column(
+        "_object_id", Integer, ForeignKey("abstract_object._id"), nullable=False
+    )
 
 
 class ObjectEstimate(Base):
@@ -122,6 +167,8 @@ class ObjectEstimate(Base):
 
     id = Column("_id", Integer, unique=True, primary_key=True, autoincrement=True)
     user_id = Column("_user_id", Integer, ForeignKey("user._id"), nullable=False)
-    object_id = Column("_object_id", Integer, ForeignKey("abstract_object._id"), nullable=False)
+    object_id = Column(
+        "_object_id", Integer, ForeignKey("abstract_object._id"), nullable=False
+    )
     datetime = Column("_datetime", DateTime, nullable=False)
     rating = Column("_rating", Enum(EstimateEnum, name="estimate_enum"), nullable=False)
