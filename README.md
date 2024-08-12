@@ -17,9 +17,9 @@
    * ```venv\Scripts\activate.bat```
    * 
 5. Далее устанавливаем зависимости для работы (FastApi и тп)
-    * ```pip install requirements.txt```
+    * ```pip install -r requirements.txt```
 6. Запускаем сервер (тестовый, для работы не пригодится)
-    * ```unicorn src.main:app --reload```
+    * ```uvicorn src.main:app --reload```
 7. Переходим на сайт http://127.0.0.1:8000 (или тот, что у вас появился в терминале)
 
 P.S:
