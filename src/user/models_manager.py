@@ -1,7 +1,74 @@
 from src import database
-from src.auth import models
+from src.user import models
 from typing import Union
 from sqlalchemy import select
+
+
+async def is_login_exists(login: str) -> bool:
+    async with database.async_session() as session:
+        user = await session.execute(
+            select(models.User).where(models.User.login == login)
+        )
+        user = user.scalars().first()
+        if user:
+            return True
+        return False
+
+
+async def is_email_exists(email: str) -> bool:
+    async with database.async_session() as session:
+        user = await session.execute(
+            select(models.User).where(models.User.email == email)
+        )
+        user = user.scalars().first()
+        if user:
+            return True
+        return False
+
+
+async def add_user(
+    login: str, password_hash: str, email: str, username: str, sex: bool, age: int
+) -> int:
+    """Adds new user to database without any checks
+
+    Args:
+        login (str): checked login
+        password_hash (str): hash of password
+        email (str): checked email
+        username (str): Name, Surname, Patroname
+        sex (bool): sex
+        age (int): age
+
+    Returns:
+        int: id of new user from database
+    """
+    async with database.async_session() as session:
+        user = models.User(
+            login=login,
+            password_hash=password_hash,
+            email=email,
+            username=username,
+            sex=sex,
+            age=age,
+        )
+        session.add(user)
+        await session.commit()
+        return user.id
+
+
+async def check_password_hash(login: str, password_hash: str) -> Union[int, None]:
+    async with database.async_session() as session:
+        user = await session.execute(
+            select(models.User).where(
+                models.User.login == login
+                and models.User.password_hash == password_hash
+            )
+        )
+        user = user.scalars().first()
+        if user:
+            return user.id
+        else:
+            return None
 
 
 async def add_token(user_id: int, refresh_token: str) -> int:

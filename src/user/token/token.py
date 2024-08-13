@@ -3,14 +3,14 @@ import jwt
 from datetime import datetime, timedelta, timezone
 from typing import Union
 
-from src.auth import configs
+from src.user.token import configs
 
 
 class TokenManager:
     __SECRET_KEY = configs.SECRET_KEY
-    _ALGORITHM = configs.ALGORITHM,
-    _ACCESS_TOKEN_EXPIRE_MINUTES = configs.ACCESS_TOKEN_EXPIRE_MINUTES,
-    _REFRESH_TOKEN_EXPIRE_DAYS = configs.REFRESH_TOKEN_EXPIRE_DAYS,
+    _ALGORITHM = configs.ALGORITHM
+    _ACCESS_TOKEN_EXPIRE_MINUTES = configs.ACCESS_TOKEN_EXPIRE_MINUTES
+    _REFRESH_TOKEN_EXPIRE_DAYS = configs.REFRESH_TOKEN_EXPIRE_DAYS
     
 
     header = {"alg": _ALGORITHM, "typ": "JWT"}

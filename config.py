@@ -1,9 +1,10 @@
 # данный скрипт вытягивает все чувствительные данные из .env и подставляет туда, где это необходимо
 
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
+
 
 DB_HOST = os.environ.get("DB_HOST")
 DB_PORT = os.environ.get("DB_PORT")

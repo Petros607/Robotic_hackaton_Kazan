@@ -26,49 +26,8 @@ metadata = MetaData()
 
 
 class Base(DeclarativeBase):
+    metadata = metadata
     pass
-
-
-class User(Base):
-    __tablename__ = "user"
-    metadata = metadata
-
-    id = Column(
-        "_id",
-        Integer,
-        nullable=False,
-        unique=True,
-        primary_key=True,
-        autoincrement=True,
-    )
-    login = Column("_login", String(50), unique=True, nullable=False)
-    password_hash = Column("_password_hash", String(128), nullable=False)
-    username = Column("_username", String(128), nullable=False)
-    email = Column("_email", String(100), nullable=True)
-    sex = Column("_sex", Boolean, nullable=False)
-    age = Column("_age", SmallInteger, nullable=False)
-    habitation = Column("_habitation", String(20), default="Казань", nullable=True)
-    validation = Column("_validation", Boolean, default=False, nullable=True)
-    profession = Column("_profession", String(128), nullable=True)
-    address = Column("_address", String(255), nullable=True)
-    marriage_status = Column("_marriage_status", Boolean, nullable=True)
-
-
-class Token(Base):
-    __tablename__ = "token"
-    metadata = metadata
-    id = Column(
-        "_id",
-        Integer,
-        unique=True,
-        autoincrement=True,
-        primary_key=True,
-        nullable=False,
-    )
-    user_id = Column(
-        "_user_id", Integer, ForeignKey("user._id"), unique=False, nullable=False
-    )
-    referesh_token = Column("_token", Text, unique=True, nullable=False)
 
 
 class AbstractObject(Base):
@@ -97,7 +56,7 @@ class AbstractObject(Base):
     )
     images = Column("_images", ARRAY(String(128)), nullable=True)
     docs = Column("_docs", ARRAY(String(128)), nullable=True)
-    decision = Column("_decision", Integer, ForeignKey("decision._id"), nullable=True)
+    decision = Column("_decision", Integer, ForeignKey("decision._id", name = "abstract_object__decision_fkey"), nullable=True)
     utility_rating = Column("_utility_rating", Integer, default=0)
     relevance_rating = Column("_relevance_rating", Float, default=0)
     relevance_rating_day = Column("_relevance_rating_day", Float, default=0)
@@ -118,13 +77,13 @@ class Decision(Base):
         nullable=False,
     )
     object_id = Column(
-        "_object_id", Integer, ForeignKey("abstract_object._id"), nullable=False
+        "_object_id", Integer, ForeignKey("abstract_object._id", name = "decision__object_id_fkey"), nullable=False
     )
     datetime_creation = Column("_datetime_creation", DateTime, nullable=False)
 
 
 class Comment(Base):
-    __tablename__ = "comment_estimate"
+    __tablename__ = "comment"
     metadata = metadata
 
     id = Column("_id", Integer, unique=True, primary_key=True, autoincrement=True)

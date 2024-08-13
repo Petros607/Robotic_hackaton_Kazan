@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-TOKEN_CONFIGS = "src/auth/token_configs.json"
+TOKEN_CONFIGS = "src/user/token/token_configs.json"
 
 with open(TOKEN_CONFIGS, 'r') as f:
     token_configs = json.load(f)
