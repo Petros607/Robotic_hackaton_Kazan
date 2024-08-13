@@ -56,9 +56,17 @@ async def post_logout(request: Request, token: str = Depends(oauth2_scheme)):
 
 
 @router.post("/update_data", description="Отправка новых данных о пользователе")
-async def post_update_data():
-
-    return "＼(￣▽￣)／"
+async def post_update_data(
+    request: Request,
+    user_data: schemas.UpdateUserDataRequest,
+    token: str = Depends(oauth2_scheme),
+):
+    await middleware.update_user_data(token, user_data)
+    return schemas.UpdateUserDataResponse(
+        status="Succes",
+        message="Data was succesfully updated",
+        emoji = "＼(￣▽￣)／"
+    )
 
 
 @router.post(
@@ -67,7 +75,7 @@ async def post_update_data():
 async def get_new_token(request: Request, token: schemas.RefreshTokenRequest):
     new_token = await middleware.refresh_token(token.refresh_token)
     return schemas.RefreshTokenSuccessResponse(
-                access_token=new_token,
-                expires_in=TokenManager._ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-                emoji = "＼(￣▽￣)／"
-            )
+        access_token=new_token,
+        expires_in=TokenManager._ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        emoji="＼(￣▽￣)／",
+    )

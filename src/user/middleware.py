@@ -70,3 +70,13 @@ async def refresh_token(token: str) -> str:
         return new_token
     else:
         raise HTTPException(status_code=401, detail="Refresh token is not valid")
+
+async def update_user_data(token: str, user_data: schemas.UpdateUserDataRequest):
+    user_id = TokenManager.decode_token(token)["user_id"]
+    await models_manager.update_user(user_id, 
+                                     user_data.habitation,
+                                     user_data.validation,
+                                     user_data.profession,
+                                     user_data.address,
+                                     user_data.marriage_status
+                                     )

@@ -1,7 +1,8 @@
 from src import database
-from src.user import models
+from src.user import models, schemas
 from typing import Union
 from sqlalchemy import select
+
 
 
 async def is_login_exists(login: str) -> bool:
@@ -129,3 +130,33 @@ async def delete_token(refresh_token_id: str) -> bool:
             return True
         else:
             return False
+        
+
+async def update_user(user_id: int, habitation: str | None,
+                      validation: str | None,
+                      profession: str | None,
+                      address: str | None,
+                      marriage_status: bool | None):
+    async with database.async_session() as session:
+        user = await session.execute(select(models.User).where(models.User.id == user_id))
+        user = user.scalars().first()
+        user.habitation = habitation
+        user.validation = validation
+        user.profession = profession
+        user.address = address
+        user.marriage_status = marriage_status
+        await session.commit()
+        
+async def get_user_data(user_id: int) -> schemas.UserDataResponse:
+    async with database.async_session() as session:
+        user = await session.execute(select(models.User).where(models.User.id == user_id))
+        user = user.scalars().first()
+        return schemas.UserDataResponse(username = user.username,
+                                        email = user.email,
+                                        sex = user.sex,
+                                        age = user.age,
+                                        habitation= user.habitation,
+                                        validation = user.validation,
+                                        profession = user.profession,
+                                        address = user.address,
+                                        marriage_status = user.marriage_status)
