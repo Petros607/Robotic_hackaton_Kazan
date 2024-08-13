@@ -7,6 +7,7 @@ import logging
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.user import models
 from src import models
 from config import DB_CONNECT_STRING
 import asyncio
@@ -19,6 +20,7 @@ logging.info("async_session is created")
 
 async def create_all_database():
     async with engine.begin() as conn:
+        await conn.run_sync(models.Base.metadata.drop_all)
         await conn.run_sync(models.Base.metadata.create_all)
 
 # asyncio.run(create_all_database())
